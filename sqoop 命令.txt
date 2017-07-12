@@ -1,0 +1,13 @@
+导出客户数据sqoop cem_customer
+sqoop import --hive-import  --connect jdbc:oracle:thin:@//192.168.1.150:1521/xljpdb1.ctbridev  -username cemtest -password cemtest2016  --hive-table cem.cem_customer  --query 'select * from cem_customer_test where   $CONDITIONS ' --target-dir /user/hive/warehouse/output   --split-by customer_id
+
+导入客户电路数据sqoop cem_customer_circuit
+
+sqoop import --hive-import  --connect jdbc:oracle:thin:@//192.168.1.150:1521/xljpdb1.ctbridev  -username cemtest -password cemtest2016  --hive-table cem.cem_customer_circuit_original  --query 'select b.* from cem_customer_test  a inner join cem_customer_circuit  b on a.customer_id=b.customer_id   where   $CONDITIONS ' --target-dir /user/hive/warehouse/output1   --split-by b.circuit_id;
+
+导入电路信息
+
+sqoop import --hive-import  --connect jdbc:oracle:thin:@//192.168.1.150:1521/xljpdb1.ctbridev  -username cemtest -password cemtest2016  --hive-table cem.cem_circuit_info_original  --query 'select c.* from cem_customer_test  a left join cem_customer_circuit  b on a.customer_id=b.customer_id inner join cem_circuit_info c on b.circuit_id=c.circuit_id   where   $CONDITIONS ' --target-dir /user/hive/warehouse/output2   --split-by c.circuit_id
+
+导入客户关系数据
+sqoop import --hive-import  --connect jdbc:oracle:thin:@//192.168.1.150:1521/xljpdb1.ctbridev  -username cemtest -password cemtest2016  --hive-table cem.cem_customer_relation_original  --query 'select b.* from cem_customer a inner join cem_customer_relation b on a.customer_id=b.child_customer_id where a.customer_id in (select customer_id from cem_customer_test) and a.vip_level=2 and $CONDITIONS ' --target-dir /user/hive/warehouse/output1   --split-by b.customer_id
